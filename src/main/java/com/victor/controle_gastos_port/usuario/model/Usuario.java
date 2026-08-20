@@ -1,5 +1,6 @@
 package com.victor.controle_gastos_port.usuario.model;
 
+import com.victor.controle_gastos_port.categoria.model.Categoria;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
