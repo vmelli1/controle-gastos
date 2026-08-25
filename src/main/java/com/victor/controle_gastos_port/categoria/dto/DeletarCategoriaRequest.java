@@ -1,7 +1,7 @@
 package com.victor.controle_gastos_port.categoria.dto;
 
 public record DeletarCategoriaRequest(
-        int id
+        long id
 ) {
 }
 

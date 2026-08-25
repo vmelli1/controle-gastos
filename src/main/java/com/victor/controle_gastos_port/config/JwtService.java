@@ -1,6 +1,5 @@
 package com.victor.controle_gastos_port.config;
 
-import com.victor.controle_gastos_port.usuario.model.Role;
 import com.victor.controle_gastos_port.usuario.model.Usuario;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -24,7 +23,7 @@ public class JwtService {
                 .issuedAt(new Date()) // emitdo em
                 .expiration(new Date(System.currentTimeMillis() + expiration)) // expiração
                 .signWith(getSignKey()) //  assinar com
-                .compact(); // compactar // current  time
+                .compact(); // compactar // currenttime
     }
 
     public String extractEmail(String token) {
