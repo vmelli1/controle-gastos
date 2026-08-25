@@ -33,7 +33,7 @@ public class ListaCategoriaService {
 
         var paginaCategorias = categoriaRepository.findByUsuario(usuarioAutenticado,PageRequest.of(pagina, 10));
         return new ListaCategoriaResponse(paginaCategorias.getContent()
-                .stream().map(categoria -> new CategoriaResponse(categoria.getNome(),categoria.isAtivo()) ).toList()
+                .stream().map(categoria -> new CategoriaResponse(categoria.getId(),categoria.getNome(),categoria.isAtivo()) ).toList()
                 ,paginaCategorias.getNumber(), paginaCategorias.getTotalPages(),  paginaCategorias.getTotalElements());
     }
 }

@@ -13,7 +13,7 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import java.util.Optional;
 
 
-public interface CategoriaRepository  extends JpaRepository<Categoria, Integer> {
+public interface CategoriaRepository  extends JpaRepository<Categoria, Long> {
 
     boolean existsByNomeAndUsuario(String nome, Usuario usuarioAutenticado);
 

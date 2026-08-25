@@ -41,7 +41,7 @@ public class CategoriaService
 
         var salvar = categoriaRepository.save(categoria);
 
-        return  new CategoriaResponse(salvar.getNome(), salvar.isAtivo());
+        return  new CategoriaResponse(salvar.getId(),salvar.getNome(), salvar.isAtivo());
 
     }
 }

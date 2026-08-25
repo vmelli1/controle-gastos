@@ -3,6 +3,7 @@ package com.victor.controle_gastos_port.categoria.dto;
 import com.victor.controle_gastos_port.usuario.model.Usuario;
 
 public record CategoriaResponse(
+        Long id,
         String nome,
         boolean ativo
 ) {
