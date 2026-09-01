@@ -1,5 +1,6 @@
 package com.victor.controle_gastos_port.gasto.repository;
 
+import com.victor.controle_gastos_port.categoria.model.Categoria;
 import com.victor.controle_gastos_port.dashboard.dto.ExibirGraficoResponse;
 import com.victor.controle_gastos_port.gasto.model.Gasto;
 import com.victor.controle_gastos_port.usuario.model.Usuario;
@@ -39,5 +40,18 @@ public interface GastoRepository extends JpaRepository<Gasto, Long> {
             @Param("usuario") Usuario usuario,
             @Param("inicio") LocalDate inicio,
             @Param("fim") LocalDate fin
+    );
+
+    @Query("""
+    SELECT SUM(g.valor) FROM Gasto g\s
+    WHERE g.usuario = :usuario\s
+      AND g.categoria = :categoria\s
+      AND g.data BETWEEN :inicio AND :fim
+""")
+    BigDecimal somarPorCategoriaEDatas(
+            Usuario usuario,
+            Categoria categoria,
+            LocalDate inicio,
+            LocalDate fim
     );
 }
