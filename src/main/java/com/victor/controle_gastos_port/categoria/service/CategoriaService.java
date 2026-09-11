@@ -4,31 +4,24 @@ import com.victor.controle_gastos_port.categoria.dto.CategoriaRequest;
 import com.victor.controle_gastos_port.categoria.dto.CategoriaResponse;
 import com.victor.controle_gastos_port.categoria.model.Categoria;
 import com.victor.controle_gastos_port.categoria.repository.CategoriaRepository;
+import com.victor.controle_gastos_port.config.IUsuarioAutenticadoProvider;
 import com.victor.controle_gastos_port.config.exception.CategoriaExistenteException;
 import com.victor.controle_gastos_port.usuario.model.Usuario;
-import com.victor.controle_gastos_port.config.exception.AcessoNegadoException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CategoriaService
 {
     private final CategoriaRepository categoriaRepository;
+    private final IUsuarioAutenticadoProvider usuarioProvider;
 
-    public CategoriaService(CategoriaRepository categoriaRepository) {
+    public CategoriaService(CategoriaRepository categoriaRepository, IUsuarioAutenticadoProvider usuarioProvider) {
         this.categoriaRepository = categoriaRepository;
+        this.usuarioProvider = usuarioProvider;
     }
 
     public CategoriaResponse criarCategoria(CategoriaRequest dto){
-
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (auth == null || !auth.isAuthenticated()) {
-            throw new AcessoNegadoException("Usuário não autenticado");
-        }
-
-        Usuario usuarioAutenticado = (Usuario) auth.getPrincipal();
+        Usuario usuarioAutenticado = usuarioProvider.getUsuarioLogado();
 
         if(categoriaRepository.existsByNomeAndUsuario(dto.nome(), usuarioAutenticado)){
             throw new CategoriaExistenteException("Categoria já existente");

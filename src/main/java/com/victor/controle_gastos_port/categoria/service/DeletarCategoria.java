@@ -3,44 +3,33 @@ package com.victor.controle_gastos_port.categoria.service;
 import com.victor.controle_gastos_port.categoria.dto.DeletarCategoriaRequest;
 import com.victor.controle_gastos_port.categoria.model.Categoria;
 import com.victor.controle_gastos_port.categoria.repository.CategoriaRepository;
+import com.victor.controle_gastos_port.config.IUsuarioAutenticadoProvider;
+import com.victor.controle_gastos_port.config.exception.CategoriaNaoEncontradaException;
 import com.victor.controle_gastos_port.config.exception.CategoriaPossuiGastosException;
 import com.victor.controle_gastos_port.usuario.model.Usuario;
-import com.victor.controle_gastos_port.config.exception.AcessoNegadoException;
 import jakarta.transaction.Transactional;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DeletarCategoria {
 
     private final CategoriaRepository categoriaRepository;
+    private final IUsuarioAutenticadoProvider usuarioProvider;
 
-    public DeletarCategoria(CategoriaRepository categoriaRepository) {
+    public DeletarCategoria(CategoriaRepository categoriaRepository, IUsuarioAutenticadoProvider usuarioProvider) {
         this.categoriaRepository = categoriaRepository;
+        this.usuarioProvider = usuarioProvider;
     }
 
     @Transactional
     public void deletCategoria(DeletarCategoriaRequest dto) {
+        Usuario usuarioAutenticado = usuarioProvider.getUsuarioLogado();
 
-
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if(auth == null || !auth.isAuthenticated() ) {
-            throw new AcessoNegadoException("Acesso negado");
-        }
-
-
-        Usuario usuarioAutenticado = (Usuario) auth.getPrincipal();
-
-        Categoria categoria = categoriaRepository.findById(dto.id()).orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
+        Categoria categoria = categoriaRepository.findById(dto.id()).orElseThrow(() -> new CategoriaNaoEncontradaException(dto.id()));
         if(!categoria.getUsuario().equals(usuarioAutenticado)) {
-            throw new CategoriaPossuiGastosException("Não é possível excluir a categoria pois ela possui gastos vinculados.");
+            throw new CategoriaPossuiGastosException("Você não tem permissão para excluir uma categoria que não é sua.");
         }
         categoriaRepository.delete(categoria);
-
-
-
 
     }
 }

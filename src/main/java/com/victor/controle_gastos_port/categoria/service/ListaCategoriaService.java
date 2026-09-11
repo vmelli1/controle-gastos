@@ -4,30 +4,24 @@ package com.victor.controle_gastos_port.categoria.service;
 import com.victor.controle_gastos_port.categoria.dto.CategoriaResponse;
 import com.victor.controle_gastos_port.categoria.dto.ListaCategoriaResponse;
 import com.victor.controle_gastos_port.categoria.repository.CategoriaRepository;
+import com.victor.controle_gastos_port.config.IUsuarioAutenticadoProvider;
 import com.victor.controle_gastos_port.usuario.model.Usuario;
-import com.victor.controle_gastos_port.config.exception.AcessoNegadoException;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 
 @Service
 public class ListaCategoriaService {
     private final CategoriaRepository categoriaRepository;
+    private final IUsuarioAutenticadoProvider usuarioProvider;
 
-    public ListaCategoriaService(CategoriaRepository categoriaRepository) {
+    public ListaCategoriaService(CategoriaRepository categoriaRepository, IUsuarioAutenticadoProvider usuarioProvider) {
         this.categoriaRepository = categoriaRepository;
+        this.usuarioProvider = usuarioProvider;
     }
 
     public ListaCategoriaResponse listarCategorias(int pagina) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null  ||  !authentication.isAuthenticated()) {
-            throw  new AcessoNegadoException("Acesso negado");
-        }
-
-        Usuario usuarioAutenticado = (Usuario) authentication.getPrincipal();
+        Usuario usuarioAutenticado = usuarioProvider.getUsuarioLogado();
 
         var paginaCategorias = categoriaRepository.findByUsuario(usuarioAutenticado,PageRequest.of(pagina, 10));
         return new ListaCategoriaResponse(paginaCategorias.getContent()

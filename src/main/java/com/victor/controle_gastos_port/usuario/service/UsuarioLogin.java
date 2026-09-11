@@ -29,7 +29,7 @@ public class UsuarioLogin {
         Usuario usuario = (Usuario) usuarioRepository.findByEmail(dto.email());
 
         if(usuario == null){
-            throw new CredencialInvalida("Usuario nao encontrado");
+            throw new CredencialInvalida("Credenciais inválidas");
         }
 
 
