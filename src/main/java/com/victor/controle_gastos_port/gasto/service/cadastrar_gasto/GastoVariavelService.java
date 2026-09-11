@@ -2,12 +2,14 @@ package com.victor.controle_gastos_port.gasto.service.cadastrar_gasto;
 
 import com.victor.controle_gastos_port.categoria.model.Categoria;
 import com.victor.controle_gastos_port.categoria.repository.CategoriaRepository;
+import com.victor.controle_gastos_port.config.exception.CategoriaNaoExistenteException;
 import com.victor.controle_gastos_port.gasto.dto.gasto_request.GastoVariavelRequest;
 import com.victor.controle_gastos_port.gasto.dto.gasto_response.GastoVariavelResponse;
 import com.victor.controle_gastos_port.gasto.model.Gasto;
 import com.victor.controle_gastos_port.gasto.model.GastoTIpo;
 import com.victor.controle_gastos_port.gasto.repository.GastoRepository;
 import com.victor.controle_gastos_port.usuario.model.Usuario;
+import com.victor.controle_gastos_port.config.exception.AcessoNegadoException;
 import jakarta.transaction.Transactional;
 
 import org.springframework.security.core.Authentication;
@@ -28,13 +30,13 @@ public class GastoVariavelService {
     public GastoVariavelResponse cadastrarGastoVariavel(GastoVariavelRequest dto){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if(authentication == null || !authentication.isAuthenticated() ){
-            throw new RuntimeException("Acesso negado");
+            throw new AcessoNegadoException("Acesso negado. Usuário não autenticado.");
         }
         Usuario usuario = (Usuario) authentication.getPrincipal();
-        Categoria categoria = categoriaRepository.findById(dto.categoriaId()).orElseThrow(() -> new RuntimeException("Categoria inexistente"));
+        Categoria categoria = categoriaRepository.findById(dto.categoriaId()).orElseThrow(() -> new CategoriaNaoExistenteException("Categoria inexistente"));
 
         if(!categoria.getUsuario().equals(usuario)){
-            throw new RuntimeException("acesso negado");
+            throw new AcessoNegadoException("acesso negado");
         }
 
         Gasto gasto = new Gasto();

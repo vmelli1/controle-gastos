@@ -1,13 +1,12 @@
 package com.victor.controle_gastos_port.usuario.service;
 
-import com.victor.controle_gastos_port.config.SecurityConfig;
+import com.victor.controle_gastos_port.config.exception.EmailJaCadastroException;
 import com.victor.controle_gastos_port.usuario.DTO.UsuarioRequest;
 import com.victor.controle_gastos_port.usuario.DTO.UsuarioResponse;
 import com.victor.controle_gastos_port.usuario.model.Role;
 import com.victor.controle_gastos_port.usuario.model.Usuario;
 import com.victor.controle_gastos_port.usuario.repository.UsuarioRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

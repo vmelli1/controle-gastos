@@ -3,7 +3,9 @@ package com.victor.controle_gastos_port.categoria.service;
 import com.victor.controle_gastos_port.categoria.dto.DeletarCategoriaRequest;
 import com.victor.controle_gastos_port.categoria.model.Categoria;
 import com.victor.controle_gastos_port.categoria.repository.CategoriaRepository;
+import com.victor.controle_gastos_port.config.exception.CategoriaPossuiGastosException;
 import com.victor.controle_gastos_port.usuario.model.Usuario;
+import com.victor.controle_gastos_port.config.exception.AcessoNegadoException;
 import jakarta.transaction.Transactional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,7 +27,7 @@ public class DeletarCategoria {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         if(auth == null || !auth.isAuthenticated() ) {
-            throw new RuntimeException("Acesso negado");
+            throw new AcessoNegadoException("Acesso negado");
         }
 
 
@@ -33,7 +35,7 @@ public class DeletarCategoria {
 
         Categoria categoria = categoriaRepository.findById(dto.id()).orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
         if(!categoria.getUsuario().equals(usuarioAutenticado)) {
-            throw new RuntimeException("Excluisao negada ");
+            throw new CategoriaPossuiGastosException("Não é possível excluir a categoria pois ela possui gastos vinculados.");
         }
         categoriaRepository.delete(categoria);
 

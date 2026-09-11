@@ -1,6 +1,7 @@
 package com.victor.controle_gastos_port.usuario.service;
 
 import com.victor.controle_gastos_port.config.JwtService;
+import com.victor.controle_gastos_port.config.exception.CredencialInvalida;
 import com.victor.controle_gastos_port.usuario.DTO.UsuarioLoginRequest;
 import com.victor.controle_gastos_port.usuario.DTO.UsuarioLoginResponse;
 import com.victor.controle_gastos_port.usuario.model.Usuario;
@@ -9,9 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 public class UsuarioLogin {
