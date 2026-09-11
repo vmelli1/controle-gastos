@@ -5,6 +5,8 @@ package com.victor.controle_gastos_port.admin.controller;
 import com.victor.controle_gastos_port.admin.dto.UsuarioAtivoAndDesativado;
 import com.victor.controle_gastos_port.admin.dto.UsuarioAtivoAndDesativadoResponse;
 import com.victor.controle_gastos_port.admin.domain.AdminUsuarioStatusService;
+import com.victor.controle_gastos_port.logs.dto.PaginacaoLogsDto;
+import com.victor.controle_gastos_port.logs.service.LogService;
 import com.victor.controle_gastos_port.usuario.model.Usuario;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +18,12 @@ import java.util.List;
 @RequestMapping("/admin")
 public class AdminAlterarStatusController {
     private final AdminUsuarioStatusService adminUsuarioStatusService;
+    private final LogService logService;
 
 
-    public AdminAlterarStatusController(AdminUsuarioStatusService adminDesativar) {
+    public AdminAlterarStatusController(AdminUsuarioStatusService adminDesativar, LogService logService) {
         this.adminUsuarioStatusService = adminDesativar;
+        this.logService = logService;
     }
 
     @PatchMapping("/desativar")
@@ -36,5 +40,11 @@ public class AdminAlterarStatusController {
     @GetMapping("/listar")
     public List<Usuario> listar(){
         return adminUsuarioStatusService.listar();
+    }
+
+    @GetMapping("/logs")
+    public ResponseEntity<PaginacaoLogsDto> listarLogs(@RequestParam(defaultValue = "0") int pagina){
+        var listarLog = logService.obterLogs(pagina);
+        return new ResponseEntity<>(listarLog, HttpStatus.OK);
     }
 }
