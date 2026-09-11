@@ -2,42 +2,38 @@ package com.victor.controle_gastos_port.gasto.service.editar_gasto;
 
 import com.victor.controle_gastos_port.categoria.model.Categoria;
 import com.victor.controle_gastos_port.categoria.repository.CategoriaRepository;
+import com.victor.controle_gastos_port.config.IUsuarioAutenticadoProvider;
 import com.victor.controle_gastos_port.config.exception.CategoriaNaoExistenteException;
+import com.victor.controle_gastos_port.config.exception.GastoNaoEncontradoException;
 import com.victor.controle_gastos_port.gasto.dto.editar_gasto_request.EditarGastoRequest;
 import com.victor.controle_gastos_port.gasto.dto.editar_gasto_response.EditarGastoResponse;
 import com.victor.controle_gastos_port.gasto.repository.GastoRepository;
 import com.victor.controle_gastos_port.usuario.model.Usuario;
 import com.victor.controle_gastos_port.config.exception.AcessoNegadoException;
 import jakarta.transaction.Transactional;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EditarGastoService {
     private final GastoRepository gastoRepository;
     private final CategoriaRepository categoriaRepository;
+    private final IUsuarioAutenticadoProvider usuarioProvider;
 
-    public EditarGastoService(GastoRepository gastoRepository, CategoriaRepository categoriaRepository) {
+    public EditarGastoService(GastoRepository gastoRepository, CategoriaRepository categoriaRepository, IUsuarioAutenticadoProvider usuarioProvider) {
         this.gastoRepository = gastoRepository;
         this.categoriaRepository = categoriaRepository;
+        this.usuarioProvider = usuarioProvider;
     }
 
     @Transactional
     public EditarGastoResponse editarGasto(EditarGastoRequest dto, Long id) {
-        Authentication auth =  SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuarioAutenticado = usuarioProvider.getUsuarioLogado();
 
-        if(auth == null || !auth.isAuthenticated()) {
-            throw new AcessoNegadoException("Acesso negado. Usuário não autenticado.");
-        }
-
-        Usuario usuario = (Usuario) auth.getPrincipal();
-
-        var editarGasto = gastoRepository.findById(id).orElseThrow(() -> new RuntimeException("Gasto não encontrado"));
+        var editarGasto = gastoRepository.findById(id).orElseThrow(() -> new GastoNaoEncontradoException(id));
         Categoria categoria = categoriaRepository.findById(dto.categoriaId())
                 .orElseThrow(() ->  new CategoriaNaoExistenteException("Categoria nao existente"));
 
-        if(!editarGasto.getUsuario().equals(usuario)){
+        if(!editarGasto.getUsuario().equals(usuarioAutenticado)){
             throw new AcessoNegadoException("Acesso negado");
         }
 
@@ -47,7 +43,7 @@ public class EditarGastoService {
         editarGasto.setTipo(dto.tipo());
         editarGasto.setDataVencimento(dto.dataVencimento());
         editarGasto.setCategoria(categoria);
-        editarGasto.setUsuario(usuario);
+        editarGasto.setUsuario(usuarioAutenticado);
 
 
         return new EditarGastoResponse(editarGasto.getId(),

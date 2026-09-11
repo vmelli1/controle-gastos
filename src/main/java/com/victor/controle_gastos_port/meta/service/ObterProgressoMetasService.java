@@ -1,15 +1,13 @@
 package com.victor.controle_gastos_port.meta.service;
 
 
-import com.victor.controle_gastos_port.categoria.repository.CategoriaRepository;
+import com.victor.controle_gastos_port.config.IUsuarioAutenticadoProvider;
 import com.victor.controle_gastos_port.gasto.repository.GastoRepository;
 import com.victor.controle_gastos_port.meta.dto.ObterProgressoMetasResponse;
 import com.victor.controle_gastos_port.meta.model.Meta;
 import com.victor.controle_gastos_port.meta.repository.Metarepository;
 import com.victor.controle_gastos_port.usuario.model.Usuario;
-import com.victor.controle_gastos_port.config.exception.AcessoNegadoException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -22,33 +20,30 @@ import java.util.List;
 public class ObterProgressoMetasService {
 
     private final GastoRepository gastoRepository;
-    private final CategoriaRepository categoriaRepository;
     private final Metarepository metarepository;
+    private final IUsuarioAutenticadoProvider usuarioProvider;
 
-    public ObterProgressoMetasService(GastoRepository gastoRepository, CategoriaRepository categoriaRepository, Metarepository metarepository) {
+    public ObterProgressoMetasService(GastoRepository gastoRepository, Metarepository metarepository, IUsuarioAutenticadoProvider usuarioProvider) {
         this.gastoRepository = gastoRepository;
-        this.categoriaRepository = categoriaRepository;
         this.metarepository = metarepository;
+        this.usuarioProvider = usuarioProvider;
     }
 
     public List<ObterProgressoMetasResponse> progressoMetas (YearMonth yearMonth) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new AcessoNegadoException("Acesso negado. Usuário não autenticado.");
-        }
-        Usuario usuario = (Usuario) authentication.getPrincipal();
+
+        Usuario usuarioAutenticado = usuarioProvider.getUsuarioLogado();
 
         LocalDate inicio = yearMonth.atDay(1);
         LocalDate fim = yearMonth.atEndOfMonth();
 
 
-        List<Meta> metas = metarepository.metaAtivaPorUsuarioPorMes(usuario, yearMonth);
+        List<Meta> metas = metarepository.metaAtivaPorUsuarioPorMes(usuarioAutenticado, yearMonth);
 
         return metas.stream().map(meta -> {
 
             // Busca o total gasto na categoria da meta no período
             BigDecimal totalGasto = gastoRepository.somarPorCategoriaEDatas(
-                    usuario,
+                    usuarioAutenticado,
                     meta.getCategoria(),
                     inicio,
                     fim
