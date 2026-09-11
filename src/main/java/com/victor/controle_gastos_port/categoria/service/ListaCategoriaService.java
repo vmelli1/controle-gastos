@@ -5,13 +5,11 @@ import com.victor.controle_gastos_port.categoria.dto.CategoriaResponse;
 import com.victor.controle_gastos_port.categoria.dto.ListaCategoriaResponse;
 import com.victor.controle_gastos_port.categoria.repository.CategoriaRepository;
 import com.victor.controle_gastos_port.usuario.model.Usuario;
+import com.victor.controle_gastos_port.config.exception.AcessoNegadoException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Stream;
 
 
 @Service
@@ -26,7 +24,7 @@ public class ListaCategoriaService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null  ||  !authentication.isAuthenticated()) {
-            throw  new RuntimeException("Acesso negado");
+            throw  new AcessoNegadoException("Acesso negado");
         }
 
         Usuario usuarioAutenticado = (Usuario) authentication.getPrincipal();

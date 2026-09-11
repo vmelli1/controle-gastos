@@ -7,6 +7,7 @@ import com.victor.controle_gastos_port.meta.dto.ObterProgressoMetasResponse;
 import com.victor.controle_gastos_port.meta.model.Meta;
 import com.victor.controle_gastos_port.meta.repository.Metarepository;
 import com.victor.controle_gastos_port.usuario.model.Usuario;
+import com.victor.controle_gastos_port.config.exception.AcessoNegadoException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,7 @@ public class ObterProgressoMetasService {
     public List<ObterProgressoMetasResponse> progressoMetas (YearMonth yearMonth) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
-            throw new RuntimeException("Acesso negado");
+            throw new AcessoNegadoException("Acesso negado. Usuário não autenticado.");
         }
         Usuario usuario = (Usuario) authentication.getPrincipal();
 

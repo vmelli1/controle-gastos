@@ -2,12 +2,15 @@ package com.victor.controle_gastos_port.gasto.service.cadastrar_gasto;
 
 import com.victor.controle_gastos_port.categoria.model.Categoria;
 import com.victor.controle_gastos_port.categoria.repository.CategoriaRepository;
+import com.victor.controle_gastos_port.config.exception.CategoriaNaoExistenteException;
+import com.victor.controle_gastos_port.config.exception.DataVencimentoInvalidaException;
 import com.victor.controle_gastos_port.gasto.dto.gasto_request.GastoFixoRequest;
 import com.victor.controle_gastos_port.gasto.dto.gasto_response.GastoFixoResponse;
 import com.victor.controle_gastos_port.gasto.model.Gasto;
 import com.victor.controle_gastos_port.gasto.model.GastoTIpo;
 import com.victor.controle_gastos_port.gasto.repository.GastoRepository;
 import com.victor.controle_gastos_port.usuario.model.Usuario;
+import com.victor.controle_gastos_port.config.exception.AcessoNegadoException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -26,16 +29,16 @@ public class GastoFixoService {
     public GastoFixoResponse cadastrarGasto (GastoFixoRequest dto){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if(auth == null || !auth.isAuthenticated()){
-            throw new RuntimeException("Acesso negado");
+            throw new AcessoNegadoException("Acesso negado. Usuário não autenticado.");
         }
         Usuario usuario = (Usuario) auth.getPrincipal();
 
 
         Categoria categoria = categoriaRepository.findById(dto.categoriaId())
-                .orElseThrow(() ->  new RuntimeException("Categoria nao existente"));
+                .orElseThrow(() ->  new CategoriaNaoExistenteException("Categoria nao existente"));
 
         if(!categoria.getUsuario().equals(usuario)){
-            throw new RuntimeException("Acesso negado");
+            throw new AcessoNegadoException("Acesso negado.");
         }
 
         Integer data = validarDataVencimento(dto);
@@ -61,7 +64,7 @@ public class GastoFixoService {
     private Integer validarDataVencimento(GastoFixoRequest  dto){
             Integer  dataVencimento = dto.dataVencimento();
             if (dataVencimento < 1 || dataVencimento > 31){
-                throw new RuntimeException("Data de vencimento invalido");
+                throw new DataVencimentoInvalidaException("Data de vencimento inválida. Não é permitido cadastrar vencimentos no passado.");
             }
 
         return dataVencimento;

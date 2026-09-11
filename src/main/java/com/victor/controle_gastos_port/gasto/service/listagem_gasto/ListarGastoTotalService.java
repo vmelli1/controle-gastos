@@ -2,12 +2,14 @@ package com.victor.controle_gastos_port.gasto.service.listagem_gasto;
 
 
 
+import com.victor.controle_gastos_port.config.exception.IntervaloDataInvalidoException;
 import com.victor.controle_gastos_port.gasto.dto.listagem.ListarGastoTotalResponse;
 import com.victor.controle_gastos_port.gasto.dto.listagem.ListarPeriododataResponse;
 import com.victor.controle_gastos_port.gasto.dto.listagem.PageListagemResponse;
 import com.victor.controle_gastos_port.gasto.model.Gasto;
 import com.victor.controle_gastos_port.gasto.repository.GastoRepository;
 import com.victor.controle_gastos_port.usuario.model.Usuario;
+import com.victor.controle_gastos_port.config.exception.AcessoNegadoException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,12 +32,12 @@ public class ListarGastoTotalService {
     public PageListagemResponse listagem(LocalDate inicio, LocalDate fim,int pagina){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication==null || !authentication.isAuthenticated()){
-            throw new RuntimeException("Acesso negado");
+            throw new AcessoNegadoException("Acesso negado. Usuário não autenticado.");
         }
         Usuario usuario = (Usuario) authentication.getPrincipal();
 
         if(inicio.isAfter(fim)){
-            throw new RuntimeException("Data inicial não pode ser maior que a data final");
+            throw new IntervaloDataInvalidoException("Data inicial não pode ser maior que a data final");
         }
 
         var listagem = gastoRepository.findByUsuarioAndAtivoTrueAndDataBetween(usuario,inicio,fim, PageRequest.of(pagina,10));

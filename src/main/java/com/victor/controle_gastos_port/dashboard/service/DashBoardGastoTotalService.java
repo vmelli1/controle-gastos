@@ -1,9 +1,11 @@
 package com.victor.controle_gastos_port.dashboard.service;
 
+import com.victor.controle_gastos_port.config.exception.IntervaloDataInvalidoException;
 import com.victor.controle_gastos_port.dashboard.dto.DashBoardResponse;
 
 import com.victor.controle_gastos_port.gasto.repository.GastoRepository;
 import com.victor.controle_gastos_port.usuario.model.Usuario;
+import com.victor.controle_gastos_port.config.exception.AcessoNegadoException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -25,12 +27,12 @@ public class DashBoardGastoTotalService {
     public DashBoardResponse gastoTotal(LocalDate inicio, LocalDate fim){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if(auth==null || !auth.isAuthenticated()){
-            throw new RuntimeException("Acesso negado.");
+            throw new AcessoNegadoException("Acesso negado. Usuário não autenticado.");
         }
         Usuario usuario = (Usuario) auth.getPrincipal();
 
         if(inicio.isAfter(fim)){
-            throw new RuntimeException("Data inicial não pode ser maior que a data final");
+            throw new IntervaloDataInvalidoException("Data inicial não pode ser maior que a data final");
         }
 
         BigDecimal gastoTotal = gastoRepository.somarTotalPorUsuarioEDatas(usuario,inicio,fim);
