@@ -3,6 +3,7 @@ package com.victor.controle_gastos_port.config;
 import java.util.Collections;
 
 import com.victor.controle_gastos_port.usuario.repository.UsuarioRepository;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,19 +35,27 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         var tokenJWT = recuperarToken(request);
 
 
-        if(tokenJWT != null){
 
-            String email = jwtService.extractEmail(tokenJWT);
-            var usuario = usuarioRepository.findByEmail(email);
-            if(usuario != null){
+        try{
+            if(tokenJWT != null) {
 
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
+                String email = jwtService.extractEmail(tokenJWT);
+                var usuario = usuarioRepository.findByEmail(email);
+                if(usuario != null){
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
+
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
-
+        }catch(JwtException | IllegalArgumentException e){
+            SecurityContextHolder.clearContext();
         }
+
+
+
+
 
         filterChain.doFilter(request,response);
 
