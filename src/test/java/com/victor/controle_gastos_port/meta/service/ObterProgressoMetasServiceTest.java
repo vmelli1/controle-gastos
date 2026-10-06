@@ -88,12 +88,12 @@ public class ObterProgressoMetasServiceTest {
         assertThat(r.estourou()).isFalse();
     }
     @Test
-    @DisplayName ("Com gastos na categoria, o total é calculado e a meta estoura, limite 100, gasto 150")
+    @DisplayName ("Com gastos na categoria, o total é calculado e a meta estoura, limite 200, gasto 250")
     void comGastos_totalCalculado_estoura(){
         //arrange
         when(usuarioProvider.getUsuarioLogado()).thenReturn(usuario);
-        when(metarepository.metaAtivaPorUsuarioPorMes(usuario, mes)).thenReturn(List.of(criarMeta("100.00")));
-        when(gastoRepository.somarPorCategoriaEDatas(eq(usuario), eq(alimentacao),any(),any())).thenReturn(new BigDecimal("150.00"));
+        when(metarepository.metaAtivaPorUsuarioPorMes(usuario, mes)).thenReturn(List.of(criarMeta("200.00")));
+        when(gastoRepository.somarPorCategoriaEDatas(eq(usuario), eq(alimentacao),any(),any())).thenReturn(new BigDecimal("250.00"));
 
         //act
         List<ObterProgressoMetasResponse> resultado = service.progressoMetas(mes);
@@ -102,19 +102,19 @@ public class ObterProgressoMetasServiceTest {
         assertThat(resultado).hasSize(1);
         ObterProgressoMetasResponse r = resultado.get(0);
         assertThat(r.nomeCategoria()).isEqualTo("Alimentação");
-        assertThat(r.valorLimite()).isEqualByComparingTo("100.00");
-        assertThat(r.totalGasto()).isEqualByComparingTo("150.00");
-        assertThat(r.percentualAtingido()).isEqualByComparingTo("150");
+        assertThat(r.valorLimite()).isEqualByComparingTo("200.00");
+        assertThat(r.totalGasto()).isEqualByComparingTo("250.00");
+        assertThat(r.percentualAtingido()).isEqualByComparingTo("125");
         assertThat(r.estourou()).isTrue();
     }
 
     @Test
-    @DisplayName ("Com gastos na categoria, o total é calculado e a meta Não estoura, limite 100, gasto 50")
-    void comGastos_totalCalculado_naoEstoura_limite100_gasto50(){
+    @DisplayName ("Com gastos na categoria, o total é calculado e a meta Não estoura, limite 200, gasto 170")
+    void comGastos_totalCalculado_naoEstoura_limite200_gasto170(){
         //arrange
         when(usuarioProvider.getUsuarioLogado()).thenReturn(usuario);
-        when(metarepository.metaAtivaPorUsuarioPorMes(usuario, mes)).thenReturn(List.of(criarMeta("100.00")));
-        when(gastoRepository.somarPorCategoriaEDatas(eq(usuario), eq(alimentacao),any(),any())).thenReturn(new BigDecimal("50.00"));
+        when(metarepository.metaAtivaPorUsuarioPorMes(usuario, mes)).thenReturn(List.of(criarMeta("200.00")));
+        when(gastoRepository.somarPorCategoriaEDatas(eq(usuario), eq(alimentacao),any(),any())).thenReturn(new BigDecimal("170.00"));
 
         //act
         List<ObterProgressoMetasResponse> resultado = service.progressoMetas(mes);
@@ -123,9 +123,9 @@ public class ObterProgressoMetasServiceTest {
         assertThat(resultado).hasSize(1);
         ObterProgressoMetasResponse r = resultado.get(0);
         assertThat(r.nomeCategoria()).isEqualTo("Alimentação");
-        assertThat(r.valorLimite()).isEqualByComparingTo("100.00");
-        assertThat(r.totalGasto()).isEqualByComparingTo("50.00");
-        assertThat(r.percentualAtingido()).isEqualByComparingTo("50");
+        assertThat(r.valorLimite()).isEqualByComparingTo("200.00");
+        assertThat(r.totalGasto()).isEqualByComparingTo("170.00");
+        assertThat(r.percentualAtingido()).isEqualByComparingTo("85");
         assertThat(r.estourou()).isFalse();
     }
 
