@@ -55,6 +55,7 @@ public class ObterProgressoMetasService {
 
             boolean estouro = totalGasto.compareTo(meta.getValorLimite()) > 0;
             BigDecimal percentual = BigDecimal.ZERO;
+            
             if(meta.getValorLimite().compareTo(BigDecimal.ZERO) > 0) {
                 percentual = totalGasto.multiply(new BigDecimal("100"))
                         .divide(meta.getValorLimite(), 2, RoundingMode.HALF_UP);

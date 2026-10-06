@@ -1,10 +1,13 @@
 package com.victor.controle_gastos_port.meta.service;
 
+import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -61,7 +64,6 @@ public class ObterProgressoMetasServiceTest {
         meta.setAtivo(true);
         return meta;
     }
-
     @Test 
     @DisplayName ("Sem gastos na Categoria, o total é zero e a meta não estoura")
     void semGastos_totalZero_naoEstoura(){
@@ -73,6 +75,10 @@ public class ObterProgressoMetasServiceTest {
 
         // act (agir - executar)
         List<ObterProgressoMetasResponse> resultado = service.progressoMetas(mes);
+        // verify (verificar se o método foi chamado)
+        verify(gastoRepository).somarPorCategoriaEDatas(eq(usuario), eq(alimentacao), 
+        eq(LocalDate.of(2026, 9, 1)), 
+        eq(LocalDate.of(2026, 9, 30)));
 
         // assert (verificar)
         assertThat(resultado).hasSize(1);
@@ -80,6 +86,105 @@ public class ObterProgressoMetasServiceTest {
         assertThat(r.totalGasto()).isEqualByComparingTo("0");
         assertThat(r.percentualAtingido()).isEqualByComparingTo("0");
         assertThat(r.estourou()).isFalse();
-
     }
+    @Test
+    @DisplayName ("Com gastos na categoria, o total é calculado e a meta estoura, limite 100, gasto 150")
+    void comGastos_totalCalculado_estoura(){
+        //arrange
+        when(usuarioProvider.getUsuarioLogado()).thenReturn(usuario);
+        when(metarepository.metaAtivaPorUsuarioPorMes(usuario, mes)).thenReturn(List.of(criarMeta("100.00")));
+        when(gastoRepository.somarPorCategoriaEDatas(eq(usuario), eq(alimentacao),any(),any())).thenReturn(new BigDecimal("150.00"));
+
+        //act
+        List<ObterProgressoMetasResponse> resultado = service.progressoMetas(mes);
+
+        //assert
+        assertThat(resultado).hasSize(1);
+        ObterProgressoMetasResponse r = resultado.get(0);
+        assertThat(r.nomeCategoria()).isEqualTo("Alimentação");
+        assertThat(r.valorLimite()).isEqualByComparingTo("100.00");
+        assertThat(r.totalGasto()).isEqualByComparingTo("150.00");
+        assertThat(r.percentualAtingido()).isEqualByComparingTo("150");
+        assertThat(r.estourou()).isTrue();
+    }
+
+    @Test
+    @DisplayName ("Com gastos na categoria, o total é calculado e a meta Não estoura, limite 100, gasto 50")
+    void comGastos_totalCalculado_naoEstoura_limite100_gasto50(){
+        //arrange
+        when(usuarioProvider.getUsuarioLogado()).thenReturn(usuario);
+        when(metarepository.metaAtivaPorUsuarioPorMes(usuario, mes)).thenReturn(List.of(criarMeta("100.00")));
+        when(gastoRepository.somarPorCategoriaEDatas(eq(usuario), eq(alimentacao),any(),any())).thenReturn(new BigDecimal("50.00"));
+
+        //act
+        List<ObterProgressoMetasResponse> resultado = service.progressoMetas(mes);
+
+        //assert
+        assertThat(resultado).hasSize(1);
+        ObterProgressoMetasResponse r = resultado.get(0);
+        assertThat(r.nomeCategoria()).isEqualTo("Alimentação");
+        assertThat(r.valorLimite()).isEqualByComparingTo("100.00");
+        assertThat(r.totalGasto()).isEqualByComparingTo("50.00");
+        assertThat(r.percentualAtingido()).isEqualByComparingTo("50");
+        assertThat(r.estourou()).isFalse();
+    }
+
+     @Test
+    @DisplayName ("Com gastos na categoria, o total é calculado e a meta não estoura, limite 100, gasto 100")
+    void comGastos_totalCalculado_naoEstoura_Limite100_Gasto100(){
+        //arrange
+        when(usuarioProvider.getUsuarioLogado()).thenReturn(usuario);
+        when(metarepository.metaAtivaPorUsuarioPorMes(usuario, mes)).thenReturn(List.of(criarMeta("100.00")));
+        when(gastoRepository.somarPorCategoriaEDatas(eq(usuario), eq(alimentacao),any(),any())).thenReturn(new BigDecimal("100.00"));
+
+        //act
+        List<ObterProgressoMetasResponse> resultado = service.progressoMetas(mes);
+
+        //assert
+        assertThat(resultado).hasSize(1);
+        ObterProgressoMetasResponse r = resultado.get(0);
+        assertThat(r.nomeCategoria()).isEqualTo("Alimentação");
+        assertThat(r.valorLimite()).isEqualByComparingTo("100.00");
+        assertThat(r.totalGasto()).isEqualByComparingTo("100.00");
+        assertThat(r.percentualAtingido()).isEqualByComparingTo("100");
+        assertThat(r.estourou()).isFalse();
+    }
+
+    @Test 
+    @DisplayName ("Sem metas ativas, o retorno é uma lista vazia")
+    void semMetasAtivas_retornaListaVazia(){
+        // arrange
+        when(usuarioProvider.getUsuarioLogado()).thenReturn(usuario);
+        when(metarepository.metaAtivaPorUsuarioPorMes(usuario, mes)).thenReturn(List.of());
+
+        // act
+        List<ObterProgressoMetasResponse> resultado = service.progressoMetas(mes);
+
+        // assert
+        assertThat(resultado).isEmpty();
+        verifyNoInteractions(gastoRepository);
+    }
+
+    @Test 
+    @DisplayName ("Limite zero, gasto Positivo")
+    void limiteZero_gastoPositivo(){
+        // arrange
+        when(usuarioProvider.getUsuarioLogado()).thenReturn(usuario);
+        when(metarepository.metaAtivaPorUsuarioPorMes(usuario, mes)).thenReturn(List.of(criarMeta("0.00")));
+        when(gastoRepository.somarPorCategoriaEDatas(eq(usuario), eq(alimentacao),any(),any())).thenReturn(new BigDecimal("50.00"));
+
+        // act
+        List<ObterProgressoMetasResponse> resultado = service.progressoMetas(mes);
+
+        // assert
+        assertThat(resultado).hasSize(1);
+        ObterProgressoMetasResponse r = resultado.get(0);
+        assertThat(r.nomeCategoria()).isEqualTo("Alimentação");
+        assertThat(r.valorLimite()).isEqualByComparingTo("0.00");
+        assertThat(r.totalGasto()).isEqualByComparingTo("50.00");
+        assertThat(r.percentualAtingido()).isEqualByComparingTo("0");
+        assertThat(r.estourou()).isTrue();
+    }
+
+
 }
