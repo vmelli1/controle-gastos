@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
+@Disabled("Precisa de application.properties e banco; reativar com configuração de teste")
 class ControleGastosPortApplicationTests {
 
 	@Test
-	@Disabled("Precisa de application.properties e banco; reativar com configuração de teste")
 	void contextLoads() {
 	}
 
