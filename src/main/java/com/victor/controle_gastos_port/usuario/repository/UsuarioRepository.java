@@ -1,18 +1,20 @@
 package com.victor.controle_gastos_port.usuario.repository;
 
 import com.victor.controle_gastos_port.usuario.model.Usuario;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.RepositoryDefinition;
-import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Optional;
 
 
 @RepositoryDefinition(domainClass = Usuario.class, idClass = long.class)
 public interface UsuarioRepository  {
-    Usuario existsById(Usuario usuario);
+
 
     boolean existsByEmail(String email);
-    UserDetails findByEmail(String email);
+    Optional<Usuario> findByEmailIgnoreCase(String email);
 
     <S extends Usuario> S save(S entity);
+    <D extends Usuario> void delete(D entity);
+
+    Optional<Usuario> existsById(Long id);
 }

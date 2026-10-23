@@ -1,48 +1,41 @@
 package com.victor.controle_gastos_port.usuario.service;
 
+import com.victor.controle_gastos_port.config.AuthenticatedUserProviderImpl;
 import com.victor.controle_gastos_port.config.JwtService;
 import com.victor.controle_gastos_port.config.exception.CredencialInvalida;
 import com.victor.controle_gastos_port.usuario.DTO.UsuarioLoginRequest;
 import com.victor.controle_gastos_port.usuario.DTO.UsuarioLoginResponse;
 import com.victor.controle_gastos_port.usuario.model.Usuario;
 import com.victor.controle_gastos_port.usuario.repository.UsuarioRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.jspecify.annotations.NonNull;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UsuarioLogin {
-    private static final Logger log = LoggerFactory.getLogger(UsuarioLogin.class);
-    private final UsuarioRepository usuarioRepository;
-    private final PasswordEncoder encoder;
+public class UsuarioLogin  {
+    private final AuthenticationManager authenticationManager;
+
     private final JwtService jwtService;
 
-    public UsuarioLogin(UsuarioRepository usuarioRepository, PasswordEncoder encoder, JwtService jwtService) {
-        this.usuarioRepository = usuarioRepository;
-        this.encoder = encoder;
+    public UsuarioLogin(AuthenticationManager authenticationManager,
+                        JwtService jwtService) {
+        this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
     }
-
-
     public UsuarioLoginResponse login (UsuarioLoginRequest dto){
-        Usuario usuario = (Usuario) usuarioRepository.findByEmail(dto.email());
-
-        if(usuario == null){
-            throw new CredencialInvalida("Credenciais inválidas");
-        }
-
-
-        if(!usuario.isAtivo()){
-            throw new CredencialInvalida("Usuario bloqueado");
-        }
-
-        if(!encoder.matches(dto.senha(),  usuario.getSenha())){
-            log.info("Credencial invalida do: {}", dto.email());
-            throw new CredencialInvalida("Credencial Invalida");
-        }
-
-
+          var authenticationToken =   new UsernamePasswordAuthenticationToken(dto.email(),dto.senha());
+          Authentication authentication = authenticationManager.authenticate(authenticationToken);
+          SecurityContextHolder.getContext().setAuthentication(authentication);
+          Object principa = authentication.getPrincipal();
+          if((!(principa instanceof Usuario usuario))){
+              throw new CredencialInvalida("Erro ao processar autenticação: tipo de usuário inválido.");
+          }
 
         String token = jwtService.generateToken(usuario);
 
