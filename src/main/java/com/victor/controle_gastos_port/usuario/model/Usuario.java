@@ -3,6 +3,7 @@ package com.victor.controle_gastos_port.usuario.model;
 import com.victor.controle_gastos_port.categoria.model.Categoria;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.jspecify.annotations.Nullable;
@@ -19,7 +20,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@EqualsAndHashCode
+@EqualsAndHashCode(of = "id")
 public class Usuario implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -70,5 +71,9 @@ public class Usuario implements UserDetails {
     @Override
     public boolean isEnabled() {
         return ativo;
+    }
+
+    public void alterarSenha(@NotBlank String senhaNova) {
+        this.senha = senhaNova;
     }
 }

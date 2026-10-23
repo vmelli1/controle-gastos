@@ -40,14 +40,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             if(tokenJWT != null) {
 
                 String email = jwtService.extractEmail(tokenJWT);
-                var usuario = usuarioRepository.findByEmail(email);
-                if(usuario != null){
+                var usuario = usuarioRepository.findByEmailIgnoreCase(email).orElseThrow(() ->  new ServletException("Usuario nao encontrado"));
 
-                    UsernamePasswordAuthenticationToken authToken =
+
+                UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
 
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                }
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+
             }
         }catch(JwtException | IllegalArgumentException e){
             SecurityContextHolder.clearContext();
