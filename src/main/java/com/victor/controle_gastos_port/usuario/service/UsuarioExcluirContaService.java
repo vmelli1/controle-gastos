@@ -3,6 +3,7 @@ package com.victor.controle_gastos_port.usuario.service;
 import com.victor.controle_gastos_port.config.AuthenticatedUserProviderImpl;
 import com.victor.controle_gastos_port.config.exception.CredencialInvalida;
 import com.victor.controle_gastos_port.usuario.model.Role;
+import com.victor.controle_gastos_port.usuario.model.StatusConta;
 import com.victor.controle_gastos_port.usuario.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 
@@ -24,11 +25,25 @@ public class UsuarioExcluirContaService {
             throw new CredencialInvalida("Usuario nao pode ser exluido.");
         }
 
-       if(!usuario.isAtivo()){
+       if(usuario.getStatusConta() == StatusConta.BLOQUEADA){
          throw new CredencialInvalida("Esta conta já está inativa/desativada.");
        }
-       usuarioRepository.delete(usuario);
+
+       if(usuario.getStatusConta() == StatusConta.PENDENTE_EXCLUSAO){
+           throw new CredencialInvalida("Esta conta já possui uma solicitação de exclusão em andamento.");
+       }
+
+       usuario.setStatusConta(StatusConta.PENDENTE_EXCLUSAO);
+       usuario.setCarenciaExclusao(carenciaExclusao());
+       usuario.setAtivo(false);
+
+       usuarioRepository.save(usuario);
     }
+
+    private LocalDate carenciaExclusao(){
+        return LocalDate.now().plusDays(30);
+    }
+
 
 
 }

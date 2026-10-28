@@ -36,6 +36,10 @@ public class Usuario implements UserDetails {
     private LocalDate dataNascimento;
     @Enumerated(EnumType.STRING)
     private Role role;
+    @Enumerated(EnumType.STRING)
+    private StatusConta statusConta;
+    private LocalDate carenciaExclusao;
+
     private boolean ativo;
 
     @Override
