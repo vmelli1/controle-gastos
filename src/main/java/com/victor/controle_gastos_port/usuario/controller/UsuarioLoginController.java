@@ -29,8 +29,15 @@ public class UsuarioLoginController {
         return new  ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/perfil")
-    public String perfil(Authentication authentication) {
-        return "Você está autenticado como: " + authentication.getName();
+    @PostMapping("/reativacao")
+    public ResponseEntity<UsuarioLoginResponse> reativacao(@RequestBody UsuarioLoginRequest dto) {
+       var response = usuarioLogin.reativarCarenciaExclusao(dto);
+        return new  ResponseEntity<>(response, HttpStatus.OK);
     }
+
+//    @GetMapping("/perfil")
+//    public String perfil(Authentication authentication) {
+//        System.out.println(authentication.getName());
+//        return "Você está autenticado como: " + authentication.getName();
+//    }
 }

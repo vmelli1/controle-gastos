@@ -30,7 +30,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/cadastro", "/login").permitAll()
+                        .requestMatchers("/cadastro", "/login/**").permitAll()
                         .requestMatchers("/alterar-senha").hasAnyRole("ADMIN", "USER")
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/categoria/**","/dashboard/**").hasAnyRole("USER", "ADMIN")
